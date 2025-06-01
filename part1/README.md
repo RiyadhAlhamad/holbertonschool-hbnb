@@ -29,7 +29,7 @@ This project is a simplified clone of the AirBnB platform, demonstrating a struc
 
 ## 🔧 Technologies Used
 
-- Language: **C** / **Python**
+- Language: **Python**
 - Storage: **JSON File** or **MySQL Database**
 - Architecture: **3-Layered Architecture**
 - Version Control: **Git**
