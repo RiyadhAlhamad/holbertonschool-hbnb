@@ -1,3 +1,5 @@
+from .BaseModel import BaseModel
+
 class User(BaseModel):
     def __init__(self, first_name, last_name, email, password, is_admin=False):
       super().__init__()

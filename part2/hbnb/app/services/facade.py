@@ -1,4 +1,5 @@
 from app.persistence.repository import InMemoryRepository
+from app.models.user import User
 
 class HBnBFacade:
     def __init__(self):
@@ -15,6 +16,8 @@ class HBnBFacade:
     def get_user(self, user_id):
         return self.user_repo.get(user_id)
 
+    def get_all_users(self):
+        return self.user_repo.get_all()
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)
 
@@ -22,3 +25,4 @@ class HBnBFacade:
     def get_place(self, place_id):
         # Logic will be implemented in later tasks
         pass
+    
