@@ -17,18 +17,27 @@ class AmenityList(Resource):
         """Register a new amenity"""
         # Placeholder for the logic to register a new amenity
         amenity_data = api.payload
-        existing_amenity_name = facade.get_amenity(amenity_data['name'])
-        if existing_amenity_name:
-            return {'error': 'amenity name is already exist'}, 400
-        new_amenity = facade.create_amenity(amenity_data)
-        return {'name' : new_amenity}, 201
+        try:
+            new_amenity = facade.create_amenity(amenity_data)
+            return {
+                'id': new_amenity.id,
+                'name': new_amenity.name
+            }, 201
+        except ValueError as e:
+            return {'error': str(e)}, 400
 
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
-        """Retrieve a list of all amenities"""
-        # Placeholder for logic to return a list of all amenities
-        return self.facade.get_all_amenities(), 200
+        """Retrieve the list of all amenities"""
+        amenities = facade.get_all_amenities()
+        return [
+            {
+                'id': a.id,
+                'name': a.name
+            }
+            for a in amenities
+        ], 200
 
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):
@@ -40,7 +49,10 @@ class AmenityResource(Resource):
         amenity = facade.get_amenity(amenity_id)
         if not amenity:
             return {'error': 'Amenity not found'}, 404
-        return {'name': amenity.name}
+        return {
+            'id': amenity.id,
+            'name': amenity.name
+            }, 200
 
     @api.expect(amenity_model)
     @api.response(200, 'Amenity updated successfully')
@@ -53,5 +65,8 @@ class AmenityResource(Resource):
         update_amenity = facade.update_amenity(amenity_id, amenity_data)
         if not update_amenity:
             return {'error': 'Amenity not found'}, 404
-        return {'name': update_amenity.name}
+        return {
+            'id': update_amenity.id,
+            'name': update_amenity.name
+            }, 200
 
