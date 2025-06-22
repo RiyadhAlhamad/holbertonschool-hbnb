@@ -3,6 +3,7 @@ from app.models.user import User
 from app.models.place import Place
 from app.models.amenity import Amenity
 
+
 class HBnBFacade:
     def __init__(self):
         self.user_repo = InMemoryRepository()
@@ -10,7 +11,7 @@ class HBnBFacade:
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
 
-###Users section###
+    ### Users section###
 
     def create_user(self, user_data):
         user = User(**user_data)
@@ -34,7 +35,7 @@ class HBnBFacade:
             return user
         return None
 
-###Amenity section###
+    ### Amenity section###
 
     def create_amenity(self, amenity_data):
         name = amenity_data.get("name", "")
@@ -45,14 +46,11 @@ class HBnBFacade:
         self.amenity_repo.add(new_amenity)
         return new_amenity
 
-
     def get_amenity(self, amenity_id):
         return self.amenity_repo.get(amenity_id)
 
-
     def get_all_amenities(self):
         return self.amenity_repo.get_all()
-
 
     def update_amenity(self, amenity_id, amenity_data):
         amenity = self.amenity_repo.get(amenity_id)
@@ -62,8 +60,7 @@ class HBnBFacade:
             return amenity
         return None
 
-
-###Place section###
+    ### Place section###
 
     def create_place(self, place_data):
         if place_data["price"] < 0:
@@ -134,4 +131,72 @@ class HBnBFacade:
         place.update(data)
         self.place_repo.add(place)
         return place
-    
+
+    ### Review section###
+
+    def create_review(self, review_data):
+        # Placeholder for logic to create a review, including validation for user_id, place_id, and rating
+        text = review_data.get('text')
+        rating = review_data.get('rating')
+        user_id = review_data.get('user_id')
+        place_id = review_data.get('place_id')
+
+        # Check if all fields required
+        if not all([text, rating, user_id, place_id]):
+            raise ValueError("Missing required fields")
+
+        # Check the user and place
+        user = storage.get(User, user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        place = storage.get(Place, place_id)
+        if not place:
+            raise ValueError("Place not found")
+
+        # Check rating between 1 and 5
+        if not isinstance(rating, int) or not (1 <= rating <= 5):
+            raise ValueError("Rating must be an integer between 1 and 5")
+
+        # Create the review
+        review = Review(
+            text=text,
+            rating=rating,
+            user_id=user_id,
+            place_id=place_id
+        )
+        storage.new(review)
+        storage.save()
+        return review
+
+    def get_review(self, review_id):
+        # Placeholder for logic to retrieve a review by ID
+        review = self.review_repo.get(review_id)
+        if not review:
+            raise ValueError("Review not found")
+        return review
+
+    def get_all_reviews(self):
+        # Placeholder for logic to retrieve all reviews
+        return self.review_repo.get_all()
+
+    def get_reviews_by_place(self, place_id):
+        # Placeholder for logic to retrieve all reviews for a specific place
+        return self.review_repo.get_by_attribute("place_id", place_id)
+
+    def update_review(self, review_id, review_data):
+        # Placeholder for logic to update a review
+        try:
+            update_review = self.review_repo.get(review_id)
+            update_review.update(review_data)
+            self.review_repo.update(review_id, review_data)
+            return update_review
+        except Exception as e:
+            raise ('error review in facade: ', str(e))
+
+    def delete_review(self, review_id):
+        # Placeholder for logic to delete a review
+        review_delete = self.review_repo.get(review_delete)
+        storage.delete(review_delete)
+        storage.save()
+        return True
