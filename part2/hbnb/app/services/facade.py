@@ -196,7 +196,9 @@ class HBnBFacade:
 
     def delete_review(self, review_id):
         # Placeholder for logic to delete a review
-        review_delete = self.review_repo.get(review_delete)
-        storage.delete(review_delete)
-        storage.save()
-        return True
+        try:
+            review_delete = self.review_repo.get(review_id)
+            self.review_repo.delete(review_delete)        
+            return {"message": "Review deleted successfully"} 
+        except ValueError:
+            raise ("error: Review not found")

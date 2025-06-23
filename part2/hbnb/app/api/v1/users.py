@@ -8,7 +8,7 @@ user_model = api.model('User', {
     'first_name': fields.String(required=True, description='First name of the user'),
     'last_name': fields.String(required=True, description='Last name of the user'),
     'email': fields.String(required=True, description='Email of the user'),
-    'password': fields.String(required=True, description='password of the user')
+    'password': fields.String(required=False, description='password of the user')
 })
 
 @api.route('/')
@@ -32,7 +32,7 @@ class UserList(Resource):
     @api.marshal_list_with(user_model)
     def get(self):
         """Get all users"""
-        return facade.user_repo.get_all(), 200
+        return facade.get_all_users(), 200
     
 @api.route('/<user_id>')
 class UserResource(Resource):
