@@ -7,10 +7,13 @@ d_user = [
     {"first_name":"mhamad", "last_name": "alhamad", "email": "mmmmail@mail.com"},
     {"first_name":"badr", "last_name": "alhamad", "email": "mail@mail.com"} 
 ]
+
+#POST
 for user in d_user:
     get_users = requests.post(base_url, json=user)
     print("POST: ",get_users.status_code, get_users.json())
 
+#GET
 get_all = requests.get(base_url)
 print("\n GET All Users: ", get_all.status_code)
 users = get_all.json()

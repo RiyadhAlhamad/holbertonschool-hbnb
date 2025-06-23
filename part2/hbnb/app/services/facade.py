@@ -147,11 +147,11 @@ class HBnBFacade:
             raise ValueError("Missing required fields")
 
         # Check the user and place
-        user = self.get(User, user_id)
+        user = self.user_repo.get(User, user_id)
         if not user:
             raise ValueError("User not found")
 
-        place = self.get(Place, place_id)
+        place = self.place_repo.get(Place, place_id)
         if not place:
             raise ValueError("Place not found")
 
@@ -192,7 +192,7 @@ class HBnBFacade:
             self.review_repo.update(review_id, review_data)
             return update_review
         except Exception as e:
-            raise ('error review in file facade: ', str(e))
+            raise ValueError(f"Error updating review: {str(e)}")
 
     def delete_review(self, review_id):
         # Placeholder for logic to delete a review
@@ -201,4 +201,4 @@ class HBnBFacade:
             self.review_repo.delete(review_delete)        
             return {"message": "Review deleted successfully"} 
         except ValueError:
-            raise ("error: Review not found")
+                raise ValueError("Review not found")
