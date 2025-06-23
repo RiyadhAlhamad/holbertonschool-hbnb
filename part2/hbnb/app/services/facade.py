@@ -2,6 +2,7 @@ from app.persistence.repository import InMemoryRepository
 from app.models.user import User
 from app.models.place import Place
 from app.models.amenity import Amenity
+from app.models.review import Review
 
 
 class HBnBFacade:
@@ -146,11 +147,11 @@ class HBnBFacade:
             raise ValueError("Missing required fields")
 
         # Check the user and place
-        user = storage.get(User, user_id)
+        user = self.get(User, user_id)
         if not user:
             raise ValueError("User not found")
 
-        place = storage.get(Place, place_id)
+        place = self.get(Place, place_id)
         if not place:
             raise ValueError("Place not found")
 
@@ -159,15 +160,14 @@ class HBnBFacade:
             raise ValueError("Rating must be an integer between 1 and 5")
 
         # Create the review
-        review = Review(
+        review_new = Review(
             text=text,
             rating=rating,
             user_id=user_id,
             place_id=place_id
         )
-        storage.new(review)
-        storage.save()
-        return review
+        self.review_repo.add(review_new)
+        return review_new
 
     def get_review(self, review_id):
         # Placeholder for logic to retrieve a review by ID
@@ -192,7 +192,7 @@ class HBnBFacade:
             self.review_repo.update(review_id, review_data)
             return update_review
         except Exception as e:
-            raise ('error review in facade: ', str(e))
+            raise ('error review in file facade: ', str(e))
 
     def delete_review(self, review_id):
         # Placeholder for logic to delete a review

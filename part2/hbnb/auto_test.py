@@ -17,9 +17,9 @@ users = get_all.json()
 print(users)
 
 if len(users) > 1:
-    print(users)
+    #print(users)
     user_id = users[1]["id"]
-    update = {"first_name": "Ali", "last_name": "Alil", "email": "mmmmmmm@mmmm.com"}
+    update = {"first_name": "mmmmmmmm", "last_name": "Alllllllllil", "email": "mmmmmmm@mmmm.com"}
     get_users = requests.put(base_url + user_id, json=update)
     print("\n PUT:", get_users.status_code, get_users.json())
     
