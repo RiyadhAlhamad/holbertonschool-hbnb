@@ -26,10 +26,11 @@ class ReviewList(Resource):
         try:
             review_new = facade.create_review(review_data)
             return {
+                "id": review_new.id,
                 "text": review_new.text,
                 "rating": review_new.rating,
-                "user_id": review_new.user_id,
-                "place_id": review_new.place_id
+                "user_id": review_new.user.id,
+                "place_id": review_new.place.id
             }, 201
         except ValueError as e:
             return {"error": str(e)}, 400
@@ -41,6 +42,7 @@ class ReviewList(Resource):
         review = facade.get_all_reviews()
         return [
             {
+                "id": r.id,
                 "text": r.text,
                 "rating": r.rating,
                 "user_id": r.user_id,
@@ -61,6 +63,7 @@ class ReviewResource(Resource):
         if not review:
             return {'message': 'Review not found'}, 404
         return {
+            "id": review.id,
             "text": review.text,
             "rating": review.rating,
             "user_id": review.user_id,
@@ -104,18 +107,19 @@ class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
-        """Get all reviews for a specific place"""
-        # Placeholder for logic to return a list of reviews for a place
-        try:
-            reviews = facade.get_reviews_by_place(place_id)
-            return [
-                {
-                    "text": r.text,
-                    "rating": r.rating,
-                    "user_id": r.user_id,
-                    "place_id": r.place_id
-                }
-                for r in reviews
-            ], 200
-        except ValueError:
-            return {'error': 'Place not found'}, 404
+        """Retrieve all reviews for a specific place"""
+        # Placeholder for logic to retrieve all reviews for a specific place
+        place = facade.get_place(place_id)
+        if not place:
+            return {'message': 'Place not found'}, 404
+        reviews = facade.get_reviews_by_place(place)
+        return [
+            {
+                "id": r.id,
+                "text": r.text,
+                "rating": r.rating,
+                "user_id": r.user_id,
+                "place_id": r.place_id
+            }
+            for r in reviews
+        ], 200

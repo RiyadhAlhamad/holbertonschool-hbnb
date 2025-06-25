@@ -136,38 +136,27 @@ class HBnBFacade:
     ### Review section###
 
     def create_review(self, review_data):
-        # Placeholder for logic to create a review, including validation for user_id, place_id, and rating
-        text = review_data.get('text')
-        rating = review_data.get('rating')
-        user_id = review_data.get('user_id')
-        place_id = review_data.get('place_id')
+        if not review_data.get("text") or len(review_data["text"]) > 1024:
+            raise ValueError("Review text must be non-empty and ≤ 1024 characters.")
+        if not (1 <= review_data.get("rating", 0) <= 5):
+            raise ValueError("Rating must be between 1 and 5.")
 
-        # Check if all fields required
-        if not all([text, rating, user_id, place_id]):
-            raise ValueError("Missing required fields")
-
-        # Check the user and place
-        user = self.user_repo.get(User, user_id)
+        user = self.user_repo.get(review_data["user_id"])
         if not user:
-            raise ValueError("User not found")
+            raise ValueError("User not found.")
 
-        place = self.place_repo.get(Place, place_id)
+        place = self.place_repo.get(review_data["place_id"])
         if not place:
-            raise ValueError("Place not found")
+            raise ValueError("Place not found.")
 
-        # Check rating between 1 and 5
-        if not isinstance(rating, int) or not (1 <= rating <= 5):
-            raise ValueError("Rating must be an integer between 1 and 5")
-
-        # Create the review
-        review_new = Review(
-            text=text,
-            rating=rating,
-            user_id=user_id,
-            place_id=place_id
+        new_review = Review(
+            text=review_data["text"],
+            rating=review_data["rating"],
+            user=user,
+            place=place
         )
-        self.review_repo.add(review_new)
-        return review_new
+        self.review_repo.add(new_review)
+        return new_review
 
     def get_review(self, review_id):
         # Placeholder for logic to retrieve a review by ID
@@ -180,9 +169,9 @@ class HBnBFacade:
         # Placeholder for logic to retrieve all reviews
         return self.review_repo.get_all()
 
-    def get_reviews_by_place(self, place_id):
+    def get_reviews_by_place(self, place):
         # Placeholder for logic to retrieve all reviews for a specific place
-        return self.review_repo.get_by_attribute("place_id", place_id)
+        return self.review_repo.get_by_attribute("place", place)
 
     def update_review(self, review_id, review_data):
         # Placeholder for logic to update a review
