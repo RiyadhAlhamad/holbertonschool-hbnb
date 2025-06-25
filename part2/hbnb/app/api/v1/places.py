@@ -85,16 +85,8 @@ class PlaceList(Resource):
                         "id": a.id,
                         "name": a.name
                     } for a in p.amenities
-                ], 
-                "review": 
-                [
-                    {
-                        "id": r.id,
-                        "text": r.name,
-                        "rating": r.rating,
-                        "user_id": r.user_id
-                    } for r in p.review
                 ]
+                
             }
             for p in places
         ], 200

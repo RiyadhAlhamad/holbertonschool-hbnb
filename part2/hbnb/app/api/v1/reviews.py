@@ -29,7 +29,6 @@ class ReviewList(Resource):
                 "id": review_new.id,
                 "text": review_new.text,
                 "rating": review_new.rating,
-                "user_id": review_new.user.id,
                 "place_id": review_new.place.id
             }, 201
         except ValueError as e:
@@ -44,9 +43,7 @@ class ReviewList(Resource):
             {
                 "id": r.id,
                 "text": r.text,
-                "rating": r.rating,
-                "user_id": r.user_id,
-                "place_id": r.place_id
+                "rating": r.rating
             }
             for r in review
         ], 200
@@ -70,7 +67,7 @@ class ReviewResource(Resource):
             "place_id": review.place_id
         }, 200
 
-    @api.expect(review_model)
+    #@api.expect(review_model)
     @api.response(200, 'Review updated successfully')
     @api.response(404, 'Review not found')
     @api.response(400, 'Invalid input data')
@@ -107,19 +104,13 @@ class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
-        """Retrieve all reviews for a specific place"""
-        # Placeholder for logic to retrieve all reviews for a specific place
+        """Get all reviews for a specific place"""
         place = facade.get_place(place_id)
         if not place:
-            return {'message': 'Place not found'}, 404
-        reviews = facade.get_reviews_by_place(place)
-        return [
-            {
-                "id": r.id,
-                "text": r.text,
-                "rating": r.rating,
-                "user_id": r.user_id,
-                "place_id": r.place_id
-            }
-            for r in reviews
-        ], 200
+            return {'error': 'Place not found'}, 404
+        reviews = facade.get_reviews_by_place(place_id)
+        return [{'id': review.id, 'text': review.text,
+                'rating': review.rating,
+                'user_id': review.user_id,
+                'place_id': review.place_id,
+                } for review in reviews], 200

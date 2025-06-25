@@ -67,7 +67,7 @@ places_data = [
         "price": 150.0,
         "latitude": 21.3891,
         "longitude": 39.8579,
-        "owner_id": user_ids[2],
+        "owner_id": user_ids[1],
         "amenity_ids": amenity_ids[1:]  # Pool, Parking
     }
 ]
@@ -81,7 +81,7 @@ for place in places_data:
         if place_id:
             place_ids.append(place_id)
     except Exception as e:
-        print("❌ Failed to parse place response:", e)
+        print("Failed to parse place response:", e)
         print("Raw response:", res.text)
 
 # -------------------- REVIEWS --------------------
@@ -99,5 +99,5 @@ if user_ids and place_ids:
     try:
         print(res.json())
     except Exception as e:
-        print("❌ Failed to parse review:", e)
+        print("Failed to parse review:", e)
         print("Raw response:", res.text)
