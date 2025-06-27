@@ -80,6 +80,10 @@ pip install -r requirements.txt
 
 ```
 
+-----
+
+
+
 ## ▶️ Running the API
 
 python run.py
@@ -87,12 +91,19 @@ python run.py
 The server will start on the configured host and port (default is http://127.0.0.1:5000/).
 ```
 
+-----
+
+
+
 ## ✅ Running Tests
 
 python auto_test.py
 ```
 This runs predefined automated tests to validate the API functionality.
 ```
+
+-----
+
 
 
 ## 🧠 Technologies Used
@@ -102,6 +113,10 @@ Python 3
 Flask
 
 RESTful API
+
+
+-----
+
 
 
 ## 👨‍💻 Authors
