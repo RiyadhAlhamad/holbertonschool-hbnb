@@ -7,8 +7,7 @@ api = Namespace('users', description='User operations')
 user_model = api.model('User', {
     'first_name': fields.String(required=True, description='First name of the user'),
     'last_name': fields.String(required=True, description='Last name of the user'),
-    'email': fields.String(required=True, description='Email of the user'),
-    'password': fields.String(required=False, description='password of the user')
+    'email': fields.String(required=True, description='Email of the user')
 })
 
 @api.route('/')
@@ -21,19 +20,18 @@ class UserList(Resource):
         """Register a new user"""
         user_data = api.payload
 
-        # Simulate email uniqueness check (to be replaced by real validation with persistence)
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             return {'error': 'Email already registered'}, 400
 
         new_user = facade.create_user(user_data)
-        return {'id': new_user.id, 'first_name': new_user.first_name, 'last_name': new_user.last_name, 'email': new_user.email,'password':new_user.password}, 201
+        return {'id': new_user.id, 'first_name': new_user.first_name, 'last_name': new_user.last_name, 'email': new_user.email}, 201
 
     @api.response(200, 'User successfully listed')
     def get(self):
         """Get all users"""
         all_users = facade.get_all_users()
-        return [{'id': users.id, 'first_name': users.first_name, 'last_name': users.last_name, 'email': users.email, 'password': users.password} for users in all_users], 200
+        return [{'id': users.id, 'first_name': users.first_name, 'last_name': users.last_name, 'email': users.email} for users in all_users], 200
     
 @api.route('/<user_id>')
 class UserResource(Resource):
@@ -44,7 +42,7 @@ class UserResource(Resource):
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
-        return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email,'password':user.password}, 200
+        return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
 
     @api.expect(user_model, validate=True)
     @api.response(200, 'User details updated successfully')
@@ -55,5 +53,5 @@ class UserResource(Resource):
         updated_user = facade.put_user(user_id, user_data)
         if not updated_user:
             return {'error': 'User not found'}, 404
-        return {'id': updated_user.id, 'first_name': updated_user.first_name, 'last_name': updated_user.last_name, 'email': updated_user.email,'password':updated_user.password}, 200
+        return {'id': updated_user.id, 'first_name': updated_user.first_name, 'last_name': updated_user.last_name, 'email': updated_user.email}, 200
 

@@ -45,7 +45,6 @@ for amenity in amenities_data:
     print(f"POST {amenity['name']} →", res.status_code, res.json())
     if res.status_code == 201:
         amenity_ids.append(res.json()["id"])
-
 # -------------------- PLACES --------------------
 print("\n---- PLACES ----")
 places_url = base_url + "places/"
@@ -59,7 +58,7 @@ places_data = [
         "latitude": 24.7136,
         "longitude": 46.6753,
         "owner_id": user_ids[0],
-        "amenity_ids": amenity_ids[:2]  # Wi-Fi, Pool
+        "amenities": amenity_ids[:2]# Wi-Fi, Pool
     },
     {
         "title": "City Apartment",
@@ -68,7 +67,7 @@ places_data = [
         "latitude": 21.3891,
         "longitude": 39.8579,
         "owner_id": user_ids[1],
-        "amenity_ids": amenity_ids[1:]  # Pool, Parking
+        "amenities": amenity_ids[1:]  # Pool, Parking
     }
 ]
 
@@ -91,8 +90,8 @@ if user_ids and place_ids:
     review_data = {
         "text": "Absolutely loved this place!",
         "rating": 5,
-        "user_id": user_ids[0],      # Riyadh
-        "place_id": place_ids[0]     # Beach House
+        "user_id": user_ids[0],      
+        "place_id": place_ids[0]     
     }
     res = requests.post(reviews_url, json=review_data)
     print("POST Review →", res.status_code)

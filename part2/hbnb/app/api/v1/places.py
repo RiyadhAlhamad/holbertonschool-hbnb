@@ -3,7 +3,6 @@ from app.services import facade
 import uuid
 api = Namespace('places', description='Place operations')
 
-# Define the models for related entities
 amenity_model = api.model('PlaceAmenity', {
     'id': fields.String(description='Amenity ID'),
     'name': fields.String(description='Name of the amenity')
@@ -16,7 +15,6 @@ user_model = api.model('PlaceUser', {
     'email': fields.String(description='Email of the owner')
 })
 
-# Adding the review model
 review_model = api.model('PlaceReview', {
     'id': fields.String(description='Review ID'),
     'text': fields.String(description='Text of the review'),
@@ -24,7 +22,6 @@ review_model = api.model('PlaceReview', {
     'user_id': fields.String(description='ID of the user')
 })
 
-# Define the place model for input validation and documentation
 place_model = api.model('Place', {
     'title': fields.String(required=True, description='Title of the place'),
     'description': fields.String(description='Description of the place'),
@@ -57,7 +54,7 @@ class PlaceList(Resource):
                 "latitude": place_new.latitude,
                 "longitude": place_new.longitude,
                 "owner_id": place_new.owner.id,
-                "amenities": [amenity.id for amenity in place_new.amenities],
+                "amenities": [{'id': amenity.id, 'name': amenity.name} for amenity in place_new.amenities]
             }, 201
         except ValueError as e:
             return {"message": str(e)}, 400
@@ -85,6 +82,14 @@ class PlaceList(Resource):
                         "id": a.id,
                         "name": a.name
                     } for a in p.amenities
+                ],
+                "reviews": [
+                    {
+                        "id": r.id,
+                        "text": r.text,
+                        "rating": r.rating,
+                        "user_id": r.user.id
+                    } for r in p.reviews
                 ]
                 
             }
@@ -118,7 +123,15 @@ class PlaceResource(Resource):
                                 "id": a.id,
                                 "name": a.name
                             } for a in place.amenities
-                        ]            
+                        ],
+                        "reviews": [
+                            {
+                                "id": r.id,
+                                "text": r.text,
+                                "rating": r.rating,
+                                "user_id": r.user.id
+                            } for r in place.reviews
+                        ]   
                 }, 200
                 
     @api.expect(place_model)
@@ -144,5 +157,29 @@ class PlaceResource(Resource):
                         "id": a.id,
                         "name": a.name
                         } for a in updated_place.amenities
-                        ]
+                        ],
+                "reviews": [
+                    {
+                        "id": r.id,
+                        "text": r.text,
+                        "rating": r.rating,
+                        "user_id": r.user.id
+                    } for r in updated_place.reviews
+                ]
                         }, 200
+@api.route('/<place_id>/reviews')
+class PlaceReviewList(Resource):
+    @api.response(200, 'List of reviews for the place retrieved successfully')
+    @api.response(404, 'Place not found')
+    def get(self, place_id):
+        """Get all reviews for a specific place"""
+        place = facade.get_reviews_by_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+        reviews = facade.get_reviews_by_place(place_id)
+        return [{'id': review.id, 'text': review.text,
+                'rating': review.rating,
+                'user_id': review.user.id,
+                'place_id': review.place.id,
+                } for review in reviews], 200
+    
