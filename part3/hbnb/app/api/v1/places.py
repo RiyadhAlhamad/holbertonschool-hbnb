@@ -1,6 +1,8 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 import uuid
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 api = Namespace('places', description='Place operations')
 
 amenity_model = api.model('PlaceAmenity', {
@@ -40,9 +42,12 @@ class PlaceList(Resource):
     @api.expect(place_model)
     @api.response(201, 'Place successfully created')
     @api.response(400, 'Invalid input data')
+    @jwt_required()
     def post(self):
         """ Register a new place """
+        current_user = get_jwt_identity()
         place_data = api.payload
+        place_data['owner_id'] = current_user['id']
         try:
             place_new = facade.create_place(place_data)
 
@@ -138,35 +143,49 @@ class PlaceResource(Resource):
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
+    @jwt_required()
     def put(self, place_id):
         """Update a place's information"""
+        current_user = get_jwt_identity()
+        user_id = current_user.get("id")
+        is_admin = current_user.get("is_admin", False)
+
+        # تحقق من وجود المكان أولاً
+        place = facade.get_place(place_id)
+        if not place:
+            return {'message': 'Place not found'}, 404
+
+        # تحقق الملكية أو الصلاحية
+        if not is_admin and place.owner.id != user_id:
+            return {"error": "Unauthorized"}, 403
+
+        # نفذ التحديث
         place_data = api.payload
         updated_place = facade.update_place(place_id, place_data)
-        if not updated_place:
-            return {'message': 'Place not found'}, 404
-        return {'message': 'Place updated successfully', 
-                "Place id": updated_place.id,
-                "title": updated_place.title,
-                "description": updated_place.description,
-                "price": updated_place.price,
-                "latitude": updated_place.latitude,
-                "longitude": updated_place.longitude,
-                "owner_id": updated_place.owner.id,
-                "amenities": [
-                    {
-                        "id": a.id,
-                        "name": a.name
-                        } for a in updated_place.amenities
-                        ],
-                "reviews": [
-                    {
-                        "id": r.id,
-                        "text": r.text,
-                        "rating": r.rating,
-                        "user_id": r.user.id
-                    } for r in updated_place.reviews
-                ]
-                        }, 200
+        return {
+            'message': 'Place updated successfully', 
+            "Place id": updated_place.id,
+            "title": updated_place.title,
+            "description": updated_place.description,
+            "price": updated_place.price,
+            "latitude": updated_place.latitude,
+            "longitude": updated_place.longitude,
+            "owner_id": updated_place.owner.id,
+            "amenities": [
+                {
+                    "id": a.id,
+                    "name": a.name
+                } for a in updated_place.amenities
+            ],
+            "reviews": [
+                {
+                    "id": r.id,
+                    "text": r.text,
+                    "rating": r.rating,
+                    "user_id": r.user.id
+                } for r in updated_place.reviews
+            ]
+        }, 200
 @api.route('/<place_id>/reviews')
 class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')

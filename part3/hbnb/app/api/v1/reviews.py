@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('reviews', description='Review operations')
 
@@ -17,9 +18,13 @@ class ReviewList(Resource):
     @api.expect(review_model)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
+    @jwt_required()
     def post(self):
         """Register a new review"""
+        current_user = get_jwt_identity()
         review_data = api.payload
+        review_data['user_id'] = current_user['id']
+        review_data['place_id'] = review_data.get('place_id')
         try:
             review_new = facade.create_review(review_data)
             return {
@@ -66,8 +71,20 @@ class ReviewResource(Resource):
     @api.response(200, 'Review updated successfully')
     @api.response(404, 'Review not found')
     @api.response(400, 'Invalid input data')
+    @jwt_required()
     def put(self, review_id):
         """Update a review's information"""
+        current_user = get_jwt_identity()
+        user_id = current_user.get("id")
+        is_admin = current_user.get("is_admin", False)
+
+        review = facade.get_review(review_id)
+        if not review:
+            return {'message': 'Review not found'}, 404
+
+        if not is_admin and review.user.id != user_id:
+            return {'error': 'Unauthorized'}, 403
+
         review_data = api.payload
         try:
             update_review = facade.update_review(review_id, review_data)
@@ -79,13 +96,21 @@ class ReviewResource(Resource):
             }, 200
         except ValueError as e:
             return {'error': str(e)}, 400
-
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
+    @jwt_required()
     def delete(self, review_id):
-        """Delete a review"""
-        try:
-            facade.delete_review(review_id)
-            return {'message': 'Review deleted successfully'}, 200
-        except ValueError:
-            return {'error': 'Review not found'}, 404
+        """Delete a review by ID"""
+        current_user = get_jwt_identity()
+        user_id = current_user.get("id")
+        is_admin = current_user.get("is_admin", False)
+
+        review = facade.get_review(review_id)
+        if not review:
+            return {'message': 'Review not found'}, 404
+
+        if not is_admin and review.user.id != user_id:
+            return {'error': 'Unauthorized'}, 403
+
+        facade.delete_review(review_id)
+        return {'message': 'Review deleted successfully'}, 200

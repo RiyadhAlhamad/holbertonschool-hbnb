@@ -4,17 +4,14 @@ from app.extensions import db, bcrypt
 
 
 class User(BaseModel):
-    def __init__(self, first_name, last_name, email, is_admin=False):
-      super().__init__()
-      if not first_name or not last_name or not email:
-          raise ValueError("First name, last name, and email are required.")
-      if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-          raise ValueError("Invalid email format.")
-      self.first_name = first_name
-      self.last_name = last_name
-      self.email = email
-      self.is_admin = is_admin
-      
+    __tablename__ = 'users'
+    """User model for the application"""
+    first_name = db.Column(db.String(128), nullable=False)
+    last_name = db.Column(db.String(128), nullable=False)
+    email = db.Column(db.String(256), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    
     def hash_password(self, password):
         """Hashes the password before storing it."""
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')

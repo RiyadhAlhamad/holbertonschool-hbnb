@@ -1,5 +1,8 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import request
+
 
 api = Namespace('amenities', description='Amenity operations')
 
@@ -13,9 +16,15 @@ class AmenityList(Resource):
     @api.expect(amenity_model)
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Admin privileges required')
+    @jwt_required()
     def post(self):
-        """Register a new amenity"""
-        # Placeholder for the logic to register a new amenity
+        """Admin creates a new amenity"""
+        current_user = get_jwt_identity()
+
+        if not current_user.get("is_admin"):
+            return {"error": "Admin privileges required"}, 403
+
         amenity_data = api.payload
         try:
             new_amenity = facade.create_amenity(amenity_data)
@@ -25,7 +34,6 @@ class AmenityList(Resource):
             }, 201
         except ValueError as e:
             return {'error': str(e)}, 400
-
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
@@ -58,9 +66,14 @@ class AmenityResource(Resource):
     @api.response(200, 'Amenity updated successfully')
     @api.response(404, 'Amenity not found')
     @api.response(400, 'Invalid input data')
+    @jwt_required()
     def put(self, amenity_id):
-        """Update an amenity's information"""
-        # Placeholder for the logic to update an amenity by ID
+        """Admin updates amenity"""
+        current_user = get_jwt_identity()
+
+        if not current_user.get("is_admin"):
+            return {"error": "Admin privileges required"}, 403
+
         amenity_data = api.payload
         update_amenity = facade.update_amenity(amenity_id, amenity_data)
         if not update_amenity:
@@ -68,5 +81,6 @@ class AmenityResource(Resource):
         return {
             'id': update_amenity.id,
             'name': update_amenity.name
-            }, 200
+        }, 200
+
 

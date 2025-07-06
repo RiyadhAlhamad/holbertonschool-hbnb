@@ -1,7 +1,13 @@
 import uuid
 from datetime import datetime
+from app.extensions import db  # Assuming you have set up SQLAlchemy in your Flask app
 
 class BaseModel:
+    __abstract__ = True
+    """Base model class for all models in the application"""
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     def __init__(self):
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
