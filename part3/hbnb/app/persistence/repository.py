@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 from app.extensions import db
 from app.models import user, place, review, amenity
 
+=======
+from app.models.user import User
+from app.models.place import Place
+from app.models.amenity import Amenity
+from app.models.review import Review
+from app.extensions import bcrypt , db  # Assuming you have set up Bcrypt and SQLAlchemy in your Flask app
+>>>>>>> 9950b8d (updates)
 
 class Repository(ABC):
     @abstractmethod
