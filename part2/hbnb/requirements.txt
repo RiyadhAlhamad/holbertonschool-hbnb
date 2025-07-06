@@ -1,3 +1,5 @@
 flask
 flask-restx
 requests
+flask-bcrypt
+pip install flask-bcrypt
