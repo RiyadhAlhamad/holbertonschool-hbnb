@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from app.extensions import db  # Assuming you have set up SQLAlchemy in your Flask app
 
-class BaseModel:
+class BaseModel(db.Model):
     __abstract__ = True
     """Base model class for all models in the application"""
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
