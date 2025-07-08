@@ -1,3 +1,4 @@
+
 import requests
 
 base_url = "http://127.0.0.1:5000/api/v1/"
@@ -6,29 +7,27 @@ base_url = "http://127.0.0.1:5000/api/v1/"
 print("---- USERS ----")
 users_url = base_url + "users/"
 users_data = [
-    {"first_name": "Riyadh", "last_name": "Alhamad", "email": "riyadh@mail.com"},
-    {"first_name": "Mhamad", "last_name": "Alhamad", "email": "mhamad@mail.com"},
-    {"first_name": "Badr", "last_name": "Alamri", "email": "badr@mail.com"},
-    {"first_name": "Duplicate", "last_name": "User", "email": "riyadh@mail.com"}  # هذا خطأ (إيميل مكرر)
+    {"first_name": "Riyadh", "last_name": "Alhamad", "email": "riyadh@mail.com", "password": "1234"},
+    {"first_name": "Mhamad", "last_name": "Alhamad", "email": "mhamad@mail.com", "password": "1234"},
+    {"first_name": "Badr", "last_name": "Alamri", "email": "badr@mail.com", "password": "1234"},
+    {"first_name": "Duplicate", "last_name": "User", "email": "riyadh@mail.com", "password": "1234"}  # Duplicate email
 ]
 
 user_ids = []
+tokens = []
 
 for user in users_data:
     res = requests.post(users_url, json=user)
     print(f"POST {user['email']} →", res.status_code, res.json())
     if res.status_code == 201:
+        login = requests.post(base_url + "auth/login", json={
+            "email": user["email"],
+            "password": user["password"]
+        })
+        token = login.json().get("access_token")
+        if token:
+            tokens.append(token)
         user_ids.append(res.json()["id"])
-
-# تحديث المستخدم الثاني إن وُجد
-if len(user_ids) > 1:
-    update_data = {
-        "first_name": "Updated",
-        "last_name": "Name",
-        "email": "updated@mail.com"
-    }
-    res = requests.put(users_url + user_ids[1], json=update_data)
-    print("PUT (update second user):", res.status_code, res.json())
 
 # -------------------- AMENITIES --------------------
 print("\n---- AMENITIES ----")
@@ -45,6 +44,7 @@ for amenity in amenities_data:
     print(f"POST {amenity['name']} →", res.status_code, res.json())
     if res.status_code == 201:
         amenity_ids.append(res.json()["id"])
+
 # -------------------- PLACES --------------------
 print("\n---- PLACES ----")
 places_url = base_url + "places/"
@@ -57,8 +57,7 @@ places_data = [
         "price": 250.0,
         "latitude": 24.7136,
         "longitude": 46.6753,
-        "owner_id": user_ids[0],
-        "amenities": amenity_ids[:2]# Wi-Fi, Pool
+        "amenities": amenity_ids[:2]
     },
     {
         "title": "City Apartment",
@@ -66,13 +65,13 @@ places_data = [
         "price": 150.0,
         "latitude": 21.3891,
         "longitude": 39.8579,
-        "owner_id": user_ids[1],
-        "amenities": amenity_ids[1:]  # Pool, Parking
+        "amenities": amenity_ids[1:]
     }
 ]
 
-for place in places_data:
-    res = requests.post(places_url, json=place)
+for i, place in enumerate(places_data):
+    headers = {"Authorization": f"Bearer {tokens[i]}"}
+    res = requests.post(places_url, json=place, headers=headers)
     try:
         response_data = res.json()
         print(f"POST {place['title']} →", res.status_code, response_data)
@@ -90,10 +89,10 @@ if user_ids and place_ids:
     review_data = {
         "text": "Absolutely loved this place!",
         "rating": 5,
-        "user_id": user_ids[0],      
-        "place_id": place_ids[0]     
+        "place_id": place_ids[0]
     }
-    res = requests.post(reviews_url, json=review_data)
+    headers = {"Authorization": f"Bearer {tokens[0]}"}
+    res = requests.post(reviews_url, json=review_data, headers=headers)
     print("POST Review →", res.status_code)
     try:
         print(res.json())

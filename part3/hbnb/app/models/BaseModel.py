@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from app.extensions import db  # Assuming you have set up SQLAlchemy in your Flask app
+from app import db  # Assuming you have set up SQLAlchemy in your Flask app
 
 class BaseModel(db.Model):
     __abstract__ = True
