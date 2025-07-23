@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_restx import Api
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
@@ -29,6 +29,8 @@ def create_app(config_class=config.DevelopmentConfig):
     app.config['JWT_SECRET_KEY'] = 'some‑strong‑secret'
     app.config['JWT_TOKEN_LOCATION'] = ['headers']  
 
+    print('has been called')
+
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)   
@@ -39,6 +41,22 @@ def create_app(config_class=config.DevelopmentConfig):
     api.add_namespace(reviews_ns, path='/api/v1/reviews')
     api.add_namespace(admin_ns, path='/api/v1/admin')
     api.add_namespace(auth_ns, path='/api/v1/auth')
+
+    @app.route('/login')
+    def login():
+        return render_template("login.html")
+    
+    @app.route('/home')
+    def home():
+        return render_template("index.html")
+    
+    @app.route('/place')
+    def place():
+        return render_template("place.html")
+    
+    @app.route('/review')
+    def review():
+        return render_template("add_review.html")
     
     with app.app_context():
         db.create_all()
